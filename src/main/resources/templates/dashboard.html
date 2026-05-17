@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | BSAC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="navbar-brand">
+        <i class="ti ti-building" aria-hidden="true"></i> BSAC Portal
+    </a>
+    <div class="nav-links" style="display:flex;align-items:center;gap:16px">
+        <a href="/dashboard" class="active"><i class="ti ti-home" style="margin-right:4px"></i>Home</a>
+        <a href="/booking"><i class="ti ti-bed" style="margin-right:4px"></i>Book Room</a>
+        <a href="/storage"><i class="ti ti-package" style="margin-right:4px"></i>Storage</a>
+        <a href="/complaints"><i class="ti ti-tool" style="margin-right:4px"></i>Complaints</a>
+        <a href="/rules"><i class="ti ti-gavel" style="margin-right:4px"></i>Rules</a>
+        <a href="/admin" style="color:var(--g700);font-weight:600"><i class="ti ti-shield-check" style="margin-right:4px"></i>Admin Portal</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn-logout"><i class="ti ti-logout" style="margin-right:4px"></i>Logout</button>
+        </form>
+        <!-- Clickable Student Profile Avatar -->
+        <div class="avatar-container" style="position:relative;cursor:pointer" onclick="changeStudentProfilePicture()" title="Click to change profile picture">
+            <img th:src="${student.profilePictureUrl}" alt="Student Profile" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--g600);transition:transform 0.2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            <div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--g600);border-radius:50%;border:2px solid #fff"></div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="welcome-banner">
+        <div>
+            <h3>Good day, <span th:text="${student.name}">Student</span> 👋</h3>
+            <p>Manage your accommodation, storage and complaints all in one place.</p>
+        </div>
+        <span class="badge badge-grn" style="font-size:11px">Active</span>
+    </div>
+
+    <!-- ── 16:30 CHECKOUT WARNING BANNER ── -->
+    <div th:if="${showCheckoutWarning}" id="checkoutWarningBanner" style="background:linear-gradient(135deg,#7b3500,#bf360c);color:#fff;border-radius:12px;padding:18px 22px;margin-bottom:18px;display:flex;align-items:center;gap:16px;box-shadow:0 4px 18px rgba(191,54,12,0.35);animation:pulse-warn 2s infinite">
+        <div style="font-size:36px;line-height:1">🔔</div>
+        <div style="flex:1">
+            <div style="font-weight:700;font-size:14px;margin-bottom:2px">Visitor Checkout Alert — 30 Minutes Remaining!</div>
+            <p style="font-size:12px;opacity:0.9;margin:0">Your visitor(s) must exit the premises by <strong>17:00 hrs, NOT 21:00 hrs</strong>. Please notify them to check out at the gate now.</p>
+        </div>
+        <div style="text-align:center;background:rgba(255,255,255,0.15);border-radius:8px;padding:10px 16px;min-width:70px">
+            <div style="font-size:9px;text-transform:uppercase;opacity:0.8;letter-spacing:.5px">Checkout</div>
+            <div style="font-size:20px;font-weight:800;font-family:'Courier New',monospace">17:00</div>
+        </div>
+    </div>
+    <style>@keyframes pulse-warn{0%,100%{box-shadow:0 4px 18px rgba(191,54,12,0.35)}50%{box-shadow:0 4px 30px rgba(191,54,12,0.65)}}</style>
+
+    <!-- Time Error Warning -->
+    <div th:if="${param.timeError != null}" class="card" style="background:#fde8e8;border-left:4px solid #c62828;color:#8b1a1a;padding:16px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px">
+            <i class="ti ti-alarm" style="font-size:20px"></i>
+            <strong style="font-size:13px">Visitor Booking Restricted</strong>
+        </div>
+        <p style="font-size:12px;margin:4px 0 0;color:#c62828">Visitor gate passes can only be booked between <strong>13:00 hrs</strong> and <strong>17:00 hrs</strong> (Local Time).</p>
+    </div>
+
+    <!-- Double Booking Error Warning -->
+    <div th:if="${param.hasRoom != null}" class="card" style="background:#fde8e8;border-left:4px solid #c62828;color:#8b1a1a;padding:16px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px">
+            <i class="ti ti-lock" style="font-size:20px"></i>
+            <strong style="font-size:13px">Room Booking Locked</strong>
+        </div>
+        <p style="font-size:12px;margin:4px 0 0;color:#c62828">You already have an active secured/pending accommodation room booking. You are not allowed to book multiple rooms.</p>
+    </div>
+
+    <!-- Announcements Billboard -->
+    <div th:each="ann : ${announcements}" class="card" style="background:#eaf6ec;border-left:4px solid var(--g600);margin-bottom:16px;padding:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <i class="ti ti-speakerphone" style="color:var(--g800);font-size:18px"></i>
+            <strong style="color:var(--g900);font-size:13px" th:text="${ann.title}">Announcement Title</strong>
+            <span style="font-size:9px;color:var(--g700);margin-left:auto" th:text="${#temporals.format(ann.createdAt, 'dd MMM yyyy, HH:mm')}">Date</span>
+        </div>
+        <p style="font-size:12px;color:var(--g900);margin:0;line-height:1.5" th:text="${ann.content}">Announcement body content...</p>
+    </div>
+
+    <!-- Academic Profile Card -->
+    <div class="card" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:16px">
+            <img th:src="${student.profilePictureUrl}" alt="Student Avatar" style="width:58px;height:58px;border-radius:50%;object-fit:cover;border:3px solid var(--border)">
+            <div>
+                <h3 style="margin:0;font-size:16px" th:text="${student.name}">Student Name</h3>
+                <span style="font-size:11px;color:var(--gray)"><i class="ti ti-school" style="margin-right:2px"></i>NUST Academic Profile</span>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0">
+            <div class="pfield" style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--border);font-size:12px">
+                <span style="color:var(--gray)">Student No.</span>
+                <span style="font-weight:600;color:var(--blk2)" th:text="${student.studentNumber}">N01234567S</span>
+            </div>
+            <div class="pfield" style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--border);font-size:12px">
+                <span style="color:var(--gray)">Programme</span>
+                <span style="font-weight:600;color:var(--blk2)" th:text="${student.program != null ? student.program : '—'}">BSc CS</span>
+            </div>
+            <div class="pfield" style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--border);font-size:12px">
+                <span style="color:var(--gray)">Year of Study</span>
+                <span style="font-weight:600;color:var(--blk2)" th:text="${student.yearOfStudy != null ? student.yearOfStudy : '—'}">Year 2</span>
+            </div>
+            <div class="pfield" style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--border);font-size:12px">
+                <span style="color:var(--gray)">Part</span>
+                <span style="font-weight:600;color:var(--blk2)" th:text="${student.part != null ? student.part : '—'}">Part II</span>
+            </div>
+            <div class="pfield" style="display:flex;justify-content:space-between;padding:9px 0;font-size:12px">
+                <span style="color:var(--gray)">Semester</span>
+                <span style="font-weight:600;color:var(--blk2)" th:text="${student.semesterEnrolled != null ? student.semesterEnrolled : '—'}">Semester 1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registered Car Section -->
+    <div class="card">
+        <h3><i class="ti ti-car" style="margin-right:6px;color:var(--g600)"></i>Student Parking Permit (Car Registration)</h3>
+        
+        <div th:if="${car != null}" style="display:flex;align-items:center;justify-content:space-between;background:var(--g50);border:1px dashed var(--g500);border-radius:10px;padding:16px">
+            <div>
+                <div style="font-weight:700;font-size:14px;color:var(--g900)">
+                    <i class="ti ti-car" style="margin-right:4px;color:var(--g600)"></i>
+                    <span th:text="${car.carColor}">Red</span> <span th:text="${car.carName}">Ford Fiesta</span>
+                </div>
+                <div style="font-size:11px;color:var(--g800);margin-top:2px">
+                    Authorized Parking Permit Holder for BSAC Premises.
+                </div>
+            </div>
+            <div style="background:var(--g800);color:#fff;border-radius:6px;padding:8px 16px;text-align:center">
+                <div style="font-size:8px;text-transform:uppercase;opacity:0.8">Permit Reg</div>
+                <strong style="font-family:'Courier New', monospace;font-size:15px" th:text="${car.regNumber}">ABC-1234</strong>
+            </div>
+        </div>
+
+        <div th:if="${car == null}">
+            <p style="font-size:12px;color:var(--gray);margin-bottom:12px">Register your vehicle details if you intend to park inside the Bulawayo Accommodation Center premises.</p>
+            <button onclick="toggleCarForm()" class="btn btn-outline" style="width:auto;margin-top:0">
+                <i class="ti ti-plus" style="margin-right:4px"></i>Register a Vehicle
+            </button>
+
+            <!-- Car Register Form (hidden by default) -->
+            <form id="carForm" th:action="@{/car/register}" method="post" style="display:none;margin-top:16px;background:var(--wht2);border:1px solid var(--border);border-radius:8px;padding:16px">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label for="carName">Vehicle Model/Name</label>
+                        <input type="text" id="carName" name="carName" class="form-control" placeholder="e.g. Ford Fiesta" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label for="carColor">Vehicle Color</label>
+                        <input type="text" id="carColor" name="carColor" class="form-control" placeholder="e.g. Red" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label for="regNumber">Registration Number</label>
+                        <input type="text" id="regNumber" name="regNumber" class="form-control" placeholder="e.g. ABI-1929" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:auto;margin-top:12px">
+                    Save Vehicle Registration
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bookings -->
+    <div class="card">
+        <h3><i class="ti ti-bed" style="margin-right:6px;color:var(--g600)"></i>Your Room Bookings</h3>
+        <div th:if="${bookings.empty}" style="padding:12px 0">
+            <p>You haven't booked any rooms yet.</p>
+            <a href="/booking" class="btn btn-primary" style="width:auto;margin-top:12px;display:inline-block;padding:9px 18px">
+                <i class="ti ti-plus" style="margin-right:4px"></i>Book a Room Now
+            </a>
+        </div>
+        <table class="table" th:unless="${bookings.empty}">
+            <thead>
+                <tr><th>Block</th><th>Room</th><th>Semester</th><th>Payment</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="b : ${bookings}">
+                    <td th:text="${b.room.blockName}">A</td>
+                    <td th:text="${b.room.roomNumber}">101</td>
+                    <td th:text="${b.semester}">2026 S1</td>
+                    <td>
+                        <span class="badge badge-grn" th:if="${b.paymentMethod == 'ECOCASH'}">
+                            <i class="ti ti-device-mobile" style="margin-right:3px"></i>EcoCash
+                        </span>
+                        <span class="badge badge-blk" th:if="${b.paymentMethod == 'ONLINE_BANKING'}">
+                            <i class="ti ti-building-bank" style="margin-right:3px"></i>Online Banking
+                        </span>
+                        <span class="badge" style="background:var(--wht3);color:var(--blk3)" th:if="${b.paymentMethod == null}">—</span>
+                    </td>
+                    <td>
+                        <span class="badge badge-amb" th:if="${b.status.startsWith('PENDING')}" th:text="${b.status}">PENDING</span>
+                        <span class="badge badge-grn" th:unless="${b.status.startsWith('PENDING')}" th:text="${b.status}">SECURED</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Visitor Passes section -->
+    <div class="two-col" style="grid-template-columns:1fr 1fr;margin-bottom:20px">
+        <!-- Book Visitor Form -->
+        <div class="card">
+            <h3><i class="ti ti-user-plus" style="margin-right:6px;color:var(--g600)"></i>Book Visitor Gate Pass</h3>
+            <div style="display:flex;align-items:center;gap:6px;background:#edf7ed;border:1px solid var(--g300);border-radius:6px;padding:8px 12px;margin-bottom:12px">
+                <i class="ti ti-clock" style="color:var(--g700);font-size:14px"></i>
+                <p style="font-size:11px;color:var(--g800);margin:0">Visitor booking window: <strong>13:00 – 17:00 hrs daily</strong>. All visitors must check out by <strong>17:00 hrs</strong>.</p>
+            </div>
+
+            <form th:action="@{/visitor/add}" method="post">
+                <div class="form-group">
+                    <label for="visitorName">Visitor's Full Name</label>
+                    <input type="text" id="visitorName" name="visitorName" class="form-control" placeholder="e.g. John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="visitorPhone">Visitor's Phone Number</label>
+                    <input type="text" id="visitorPhone" name="visitorPhone" class="form-control" placeholder="e.g. +263 77 123 4567" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:4px">
+                    <i class="ti ti-key" style="margin-right:6px"></i>Generate Entry Code
+                </button>
+            </form>
+        </div>
+
+        <!-- Visitor passes list -->
+        <div class="card">
+            <h3><i class="ti ti-ticket" style="margin-right:6px;color:var(--g600)"></i>Generated Passes</h3>
+
+            <div th:if="${visitorPasses.empty}" style="padding:24px;text-align:center;color:var(--gray)">
+                <i class="ti ti-user-check" style="font-size:28px;color:var(--g300);display:block;margin-bottom:8px"></i>
+                <p style="font-size:11px">No visitors registered yet.</p>
+            </div>
+
+            <div th:unless="${visitorPasses.empty}" data-has-passes="true">
+                <div th:each="vp : ${visitorPasses}" style="background:#edf7ed;border:1px dashed var(--g300);border-radius:8px;padding:12px;margin-bottom:10px;position:relative">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                        <div>
+                            <div style="font-weight:700;font-size:12px;color:var(--g900)" th:text="${vp.visitorName}">Visitor Name</div>
+                            <div style="font-size:10px;color:var(--g700)" th:text="${vp.visitorPhone}">Phone</div>
+                        </div>
+                        <div>
+                            <span class="badge badge-grn" th:if="${vp.status == 'ACTIVE'}">Active</span>
+                            <span class="badge badge-amb" th:if="${vp.status == 'HOST_REPORTED_LEFT'}">Pending Guard Verify</span>
+                            <span class="badge badge-blk" th:if="${vp.status == 'VERIFIED_LEFT'}">Checked Out</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:8px;background:var(--wht);border:1px solid var(--border);border-radius:6px;padding:6px;display:flex;align-items:center;justify-content:space-between">
+                        <span style="font-size:9px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px">Gate Pass Code</span>
+                        <span style="font-family:'Courier New', monospace;font-size:18px;font-weight:700;color:var(--g800);letter-spacing:1px" th:text="${vp.gateCode}">123456</span>
+                    </div>
+                    
+                    <div th:if="${vp.status == 'ACTIVE'}" style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+                        <div style="font-size:10px;color:#bf360c"><i class="ti ti-clock" style="margin-right:2px"></i>Must exit by <strong>17:00 hrs</strong></div>
+                        <form th:action="@{/visitor/mark-left/{id}(id=${vp.id})}" method="post" style="margin:0">
+                            <button type="submit" class="btn btn-outline" style="font-size:9px;padding:4px 8px;margin:0">
+                                <i class="ti ti-check" style="margin-right:2px"></i>Notify Visitor Left
+                            </button>
+                        </form>
+                    </div>
+                    <div th:unless="${vp.status == 'ACTIVE'}" style="margin-top:8px;font-size:10px;color:var(--gray);text-align:right">
+                        <i class="ti ti-info-circle"></i> Pass is no longer active.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="font-size:11px;font-weight:700;color:var(--blk3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Quick actions</div>
+    <div class="grid-cards">
+        <a href="/booking" class="quick-card">
+            <div class="icon"><i class="ti ti-bed"></i></div>
+            <h5>Book a Room</h5>
+            <p>Reserve your space for the next semester</p>
+        </a>
+        <a href="/complaints" class="quick-card">
+            <div class="icon"><i class="ti ti-tool"></i></div>
+            <h5>Report an Issue</h5>
+            <p>Submit maintenance or renovation complaints</p>
+        </a>
+        <a href="/storage" class="quick-card">
+            <div class="icon"><i class="ti ti-package"></i></div>
+            <h5>Storage Unit</h5>
+            <p>List your items — flat fee $20/semester</p>
+        </a>
+        <div class="quick-card" style="cursor:default">
+            <div class="icon"><i class="ti ti-id-badge"></i></div>
+            <h5>Student ID</h5>
+            <p th:text="${student.studentNumber}">N01234567S</p>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+function toggleCarForm() {
+    const form = document.getElementById('carForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function changeStudentProfilePicture() {
+    /*<![CDATA[*/
+    const currentUrl = /*[[${student.profilePictureUrl}]]*/ '';
+    const url = prompt("Enter a profile picture URL to update your avatar:", currentUrl);
+    if (url && url.trim() !== "") {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/profile/picture";
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "profilePictureUrl";
+        input.value = url.trim();
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+    /*]]>*/
+}
+
+/*<![CDATA[*/
+// Active Notification at 16:30
+(function scheduleCheckoutWarning() {
+    const sH = /*[[${serverHour}]]*/ 0;
+    const sM = /*[[${serverMinute}]]*/ 0;
+    const hasVisitorPasses = document.querySelector('[data-has-passes]') !== null;
+    if (!hasVisitorPasses) return;
+    
+    const now = new Date();
+    const target = new Date();
+    target.setHours(16, 30, 0, 0);
+    const msUntilWarning = target - now;
+
+    function showWarningAlert() {
+        alert("🚨 VISITOR CHECKOUT ALERT!\n\nYour visitor(s) must check out by 17:00 hrs, NOT 21:00 hrs.\nPlease notify them to exit the gate immediately.");
+    }
+
+    if (msUntilWarning > 0 && msUntilWarning < 3600000) {
+        setTimeout(function() { 
+            location.reload(); 
+        }, msUntilWarning);
+    }
+
+    // If we are precisely in the warning window, show the alert once on load.
+    if (sH === 16 && sM >= 30) {
+        if (!sessionStorage.getItem('checkoutAlertShown')) {
+            showWarningAlert();
+            sessionStorage.setItem('checkoutAlertShown', 'true');
+        }
+        setTimeout(function() { location.reload(); }, 60000);
+    } else {
+        sessionStorage.removeItem('checkoutAlertShown');
+    }
+})();
+/*]]>*/
+</script>
+</body>
+</html>

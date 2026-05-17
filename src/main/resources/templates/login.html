@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSAC Portal — Unified Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .role-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--wht2);
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .role-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 4px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--blk3);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            gap: 4px;
+        }
+        .role-btn i {
+            font-size: 16px;
+        }
+        .role-btn.active {
+            background: #fff;
+            color: var(--g800);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
+        .login-card {
+            max-width: 440px;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="logo-box"><i class="ti ti-building" aria-hidden="true"></i></div>
+            <h1>BSAC Portal</h1>
+            <p>Bulawayo Student Accommodation Centre</p>
+        </div>
+
+        <!-- Role Tabs Selector -->
+        <div class="role-selector">
+            <button type="button" class="role-btn active" id="btn-student" onclick="switchRole('student')">
+                <i class="ti ti-school"></i>
+                Student
+            </button>
+            <button type="button" class="role-btn" id="btn-admin" onclick="switchRole('admin')">
+                <i class="ti ti-shield-lock"></i>
+                Admin
+            </button>
+            <button type="button" class="role-btn" id="btn-guard" onclick="switchRole('guard')">
+                <i class="ti ti-shield-check"></i>
+                Guard
+            </button>
+        </div>
+
+        <!-- Student Login Form -->
+        <div id="form-student" class="role-form">
+            <div th:if="${param.error != null && (param.role == null || param.role[0] == 'student')}" class="error-message" style="margin-bottom:14px">
+                <i class="ti ti-alert-circle" style="margin-right:4px"></i>Invalid student number or national ID.
+            </div>
+            <div th:if="${param.logout}" class="success-message" style="margin-bottom:14px">
+                <i class="ti ti-check" style="margin-right:4px"></i>You have been logged out successfully.
+            </div>
+            <div th:if="${param.registered}" class="success-message" style="margin-bottom:14px">
+                <i class="ti ti-check" style="margin-right:4px"></i>Account created! Please sign in.
+            </div>
+
+            <form th:action="@{/login?role=student}" method="post">
+                <div class="form-group">
+                    <label for="username">Student Number</label>
+                    <input type="text" id="username" name="username" class="form-control" required
+                           placeholder="e.g. N01234567S" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">National ID (Password)</label>
+                    <input type="password" id="password" name="password" class="form-control" required
+                           placeholder="e.g. 08-1234567-F-43" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:16px;background:var(--g700)">
+                    <i class="ti ti-login" style="margin-right:6px"></i>Student Sign In
+                </button>
+            </form>
+            <div style="text-align:center;margin-top:18px;font-size:12px;color:var(--gray)">
+                New to the portal?
+                <a href="/register" style="color:var(--g700);font-weight:600;text-decoration:none;margin-left:4px">Register here</a>
+            </div>
+        </div>
+
+        <!-- Admin Login Form -->
+        <div id="form-admin" class="role-form" style="display:none">
+            <div th:if="${param.error != null && param.role != null && param.role[0] == 'admin'}" class="error-message" style="margin-bottom:14px">
+                <i class="ti ti-alert-circle" style="margin-right:4px"></i>Invalid admin email or password.
+            </div>
+
+            <form th:action="@{/login?role=admin}" method="post">
+                <div class="form-group">
+                    <label for="admin_email">Admin Email</label>
+                    <input type="email" id="admin_email" name="username" class="form-control" required
+                           placeholder="e.g. admin@bsac.ac.zw" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="admin_password">Password</label>
+                    <input type="password" id="admin_password" name="password" class="form-control" required
+                           placeholder="Enter admin password" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:16px;background:var(--blk1)">
+                    <i class="ti ti-login" style="margin-right:6px"></i>Admin Sign In
+                </button>
+            </form>
+            <div style="text-align:center;margin-top:18px;font-size:12px;color:var(--gray)">
+                Need an admin account?
+                <a href="/admin/register" style="color:var(--blk1);font-weight:600;text-decoration:none;margin-left:4px">Create account</a>
+            </div>
+        </div>
+
+        <!-- Guard Login Form -->
+        <div id="form-guard" class="role-form" style="display:none">
+            <div th:if="${guardError != null}" id="guard-error-msg" class="error-message" style="margin-bottom:14px">
+                <i class="ti ti-alert-circle" style="margin-right:4px"></i><span th:text="${guardError}">Invalid guard credentials or access code.</span>
+            </div>
+
+            <form th:action="@{/guard/login}" method="post">
+                <div class="form-group">
+                    <label for="guard_firstName">First Name</label>
+                    <input type="text" id="guard_firstName" name="firstName" class="form-control" required
+                           placeholder="e.g. John" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="guard_surname">Surname</label>
+                    <input type="text" id="guard_surname" name="surname" class="form-control" required
+                           placeholder="e.g. Moyo" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="guard_code">Access Security Code</label>
+                    <input type="password" id="guard_code" name="loginCode" class="form-control" required
+                           placeholder="6-digit generated code" autocomplete="off">
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:16px;background:var(--g600)">
+                    <i class="ti ti-login" style="margin-right:6px"></i>Guard Sign In
+                </button>
+            </form>
+            <div style="text-align:center;margin-top:18px;font-size:11px;color:var(--gray)">
+                Authorized premises gate checkers only.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    function switchRole(role) {
+        // Hide all forms
+        document.querySelectorAll('.role-form').forEach(f => f.style.display = 'none');
+        // Deactivate all buttons
+        document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+        
+        // Show target form & activate button
+        document.getElementById('form-' + role).style.display = 'block';
+        document.getElementById('btn-' + role).classList.add('active');
+    }
+
+    // Auto-detect role parameter on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role');
+        if (role && (role === 'student' || role === 'admin' || role === 'guard')) {
+            switchRole(role);
+        } else if (document.getElementById('guard-error-msg') !== null) {
+            switchRole('guard');
+        }
+    });
+</script>
+</body>
+</html>

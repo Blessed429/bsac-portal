@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Registration | BSAC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="login-container" style="padding:28px 20px">
+    <div class="login-card" style="max-width:420px">
+        <div class="login-header">
+            <div class="logo-box" style="background:var(--blk8);color:#fff"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+            <h1>Admin Registration</h1>
+            <p>Register as a BSAC System Administrator</p>
+        </div>
+
+        <div th:if="${error}" class="error-message">
+            <i class="ti ti-alert-circle" style="margin-right:4px"></i>
+            <span th:text="${error}">Error</span>
+        </div>
+
+        <form th:action="@{/admin/register}" method="post">
+            <div class="form-group">
+                <label for="email">Valid Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" required
+                       placeholder="e.g. admin@bsac.ac.zw" autocomplete="email">
+                <small style="display:block;margin-top:4px;font-size:10px;color:var(--gray)">
+                    Verification code will be simulated for testing
+                </small>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:16px;background:var(--blk8)">
+                <i class="ti ti-send" style="margin-right:6px"></i>Send Verification Code
+            </button>
+        </form>
+
+        <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--gray)">
+            Already have an admin account?
+            <a href="/login" style="color:var(--g700);font-weight:600;text-decoration:none;margin-left:4px">Sign in here</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

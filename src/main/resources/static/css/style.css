@@ -1,0 +1,133 @@
+/* ── BSAC DESIGN SYSTEM ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css');
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#f4f6f3;color:#111;line-height:1.6}
+
+/* BRAND TOKENS */
+:root{
+  --g900:#0a2e0a;--g800:#14521a;--g700:#1a6b21;--g600:#1f8028;
+  --g500:#26a030;--g400:#3dba4a;--g300:#6fcc7a;--g200:#a8e3af;
+  --g100:#d4f0d7;--g50:#edf8ee;
+  --blk:#111111;--blk2:#222222;--blk3:#444444;
+  --wht:#ffffff;--wht2:#f7faf7;--wht3:#eff5ef;
+  --border:#d0e4d0;
+  --primary-green:#1a6b21;--dark-green:#14521a;
+  --gray:#888;--light-gray:#eff5ef;--white:#fff;--off-white:#f4f6f3;--black:#111;
+}
+
+/* ── NAVBAR ── */
+.navbar{background:var(--g800);color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.navbar-brand{font-size:18px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:.3px}
+.navbar-brand:hover{color:var(--g200)}
+.nav-links{display:flex;gap:20px;align-items:center}
+.nav-links a{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;font-weight:500;transition:color .18s}
+.nav-links a:hover,.nav-links a.active{color:#fff}
+.nav-links .btn-logout{background:none;border:none;color:rgba(255,255,255,.7);font-size:13px;font-weight:500;cursor:pointer;transition:color .18s;padding:0}
+.nav-links .btn-logout:hover{color:#ff8080}
+
+/* ── CONTAINER ── */
+.container{max-width:1100px;margin:28px auto;padding:0 20px}
+
+/* ── CARDS ── */
+.card{background:var(--wht);border-radius:10px;border:.5px solid var(--border);padding:20px;margin-bottom:16px}
+.card-header{margin-bottom:20px}
+.card-header h2,.card h3{font-size:16px;font-weight:600;color:var(--blk2);padding-bottom:8px;border-bottom:.5px solid var(--border);margin-bottom:12px}
+.card p{font-size:13px;color:var(--gray);line-height:1.5;margin-top:4px}
+
+/* ── BUTTONS ── */
+.btn,.btn-primary,.btn-outline{display:inline-block;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;transition:all .18s;border:none}
+.btn-primary,.btn.btn-primary{background:var(--g700);color:#fff;width:100%;margin-top:8px}
+.btn-primary:hover,.btn.btn-primary:hover{background:var(--g800);transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,107,33,.25)}
+.btn-outline{background:var(--wht);color:var(--g700);border:1.5px solid var(--g700);margin-top:8px;width:100%}
+.btn-outline:hover{background:var(--g50)}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600}
+.badge-grn,.badge-success{background:var(--g100);color:var(--g800)}
+.badge-amb,.badge-pending{background:#fff3cd;color:#7b4f00}
+.badge-red{background:#fde8e8;color:#8b1a1a}
+.badge-blk{background:#1a1a1a;color:#fff}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:14px}
+.form-group label,.label{display:block;font-size:11px;font-weight:600;color:var(--blk3);margin-bottom:4px;text-transform:none}
+.form-control,.input-field{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--wht);transition:border-color .18s;color:var(--blk)}
+.form-control:focus,.input-field:focus{border-color:var(--g600);box-shadow:0 0 0 3px rgba(26,107,33,.08)}
+textarea.form-control{resize:vertical;min-height:80px}
+
+/* ── MESSAGES ── */
+.error-message{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;background:#fde8e8;color:#8b1a1a;border:1px solid #f5c5c5}
+.success-message{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;background:var(--g100);color:var(--g800);border:1px solid var(--g200)}
+.pay-note{background:#fffbea;border:1px solid #f5d26a;border-radius:7px;padding:8px 12px;font-size:11px;color:#7a5500;margin-bottom:10px}
+
+/* ── LOGIN / REGISTER ── */
+.login-container{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--g800) 0%,var(--g900) 100%);padding:20px}
+.login-card{background:var(--wht);padding:32px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.18);width:100%;max-width:400px}
+.login-header{text-align:center;margin-bottom:24px}
+.login-header .logo-box{width:56px;height:56px;background:var(--g700);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:#fff;font-size:26px}
+.login-header h1{color:var(--g800);font-size:20px;font-weight:700;margin-bottom:4px}
+.login-header p{color:var(--gray);font-size:11px}
+
+/* ── TABLES ── */
+.table{width:100%;border-collapse:collapse;font-size:12px}
+.table th{text-align:left;padding:6px 10px;color:#555555;font-weight:600;border-bottom:.5px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+.table td{padding:8px 10px;border-bottom:.5px solid #f0f0f0;color:var(--blk2)}
+.table tr:last-child td{border-bottom:none}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.stat-card{background:var(--wht);border:.5px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.stat-card .n{font-size:26px;font-weight:700;color:var(--g700)}
+.stat-card .l{font-size:11px;color:#555555;font-weight:600;margin-top:2px}
+
+/* ── QUICK ACTION CARDS ── */
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:4px}
+.quick-card{background:var(--wht);border:.5px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .18s;text-decoration:none;display:block}
+.quick-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.08);border-color:var(--g400)}
+.quick-card .icon{font-size:22px;color:var(--g600);margin-bottom:8px}
+.quick-card h5{font-size:13px;font-weight:600;color:var(--blk2);margin-bottom:4px}
+.quick-card p{font-size:11px;color:var(--gray);line-height:1.4}
+
+/* ── ROOM GRID ── */
+.room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.room-card{border-radius:9px;border:1.5px solid var(--border);background:var(--g50);padding:14px;text-align:center;transition:all .18s;cursor:pointer}
+.room-card:hover{border-color:var(--g700);background:var(--g100)}
+.room-card h3{font-size:15px;font-weight:700;color:var(--g700);margin-bottom:4px}
+.room-card .price-tag{font-size:13px;font-weight:700;color:var(--blk2);margin:6px 0}
+.room-card p{font-size:11px;color:var(--gray)}
+.room-card .btn{font-size:11px;padding:7px 12px;margin-top:8px}
+
+/* ── COMPLAINT ITEMS ── */
+.complaint-item{background:var(--wht);border-radius:8px;border:.5px solid var(--border);padding:12px;margin-bottom:8px}
+.complaint-item .ci-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.ci-title{font-size:12px;font-weight:600;color:var(--blk2)}
+.ci-desc{font-size:11px;color:var(--gray);line-height:1.4}
+
+/* ── STORAGE ── */
+.storage-info-box{background:var(--g50);border-radius:8px;border:1px solid var(--g200);padding:14px;margin-bottom:14px}
+.storage-info-box p{font-size:12px;color:var(--g800);line-height:1.5}
+.storage-info-box .fee{font-size:28px;font-weight:700;color:var(--g700);margin:6px 0 4px}
+.item-row{display:flex;align-items:center;gap:8px;background:var(--wht);border:.5px solid var(--border);border-radius:6px;padding:9px 12px;margin-bottom:6px;font-size:12px;color:var(--blk2)}
+.item-row i{color:var(--g600);font-size:15px}
+
+/* ── WELCOME BANNER ── */
+.welcome-banner{background:var(--g800);color:#fff;border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.welcome-banner h3{font-size:16px;font-weight:700}
+.welcome-banner p{font-size:11px;opacity:.8;margin-top:3px}
+
+/* ── TWO-COL LAYOUT ── */
+.two-col{display:grid;grid-template-columns:1fr 2fr;gap:16px;align-items:start}
+
+/* ── DIVIDER ── */
+.divider{height:.5px;background:var(--border);margin:12px 0}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .navbar{position:relative;flex-direction:column;gap:10px;padding:12px 16px}
+  .nav-links{flex-wrap:wrap;justify-content:center;gap:12px}
+  .two-col{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .container{margin:24px auto;padding:0 12px}
+}

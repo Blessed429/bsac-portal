@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Room | BSAC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="navbar-brand">
+        <i class="ti ti-building" aria-hidden="true"></i> BSAC Portal
+    </a>
+    <div class="nav-links" style="display:flex;align-items:center;gap:16px">
+        <a href="/dashboard"><i class="ti ti-home" style="margin-right:4px"></i>Home</a>
+        <a href="/booking" class="active"><i class="ti ti-bed" style="margin-right:4px"></i>Book Room</a>
+        <a href="/storage"><i class="ti ti-package" style="margin-right:4px"></i>Storage</a>
+        <a href="/complaints"><i class="ti ti-tool" style="margin-right:4px"></i>Complaints</a>
+        <a href="/rules"><i class="ti ti-gavel" style="margin-right:4px"></i>Rules</a>
+        <a href="/admin" style="color:var(--g700);font-weight:600"><i class="ti ti-shield-check" style="margin-right:4px"></i>Admin Portal</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn-logout"><i class="ti ti-logout" style="margin-right:4px"></i>Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="card" style="margin-bottom:16px">
+        <h3><i class="ti ti-bed" style="margin-right:6px;color:var(--g600)"></i>Book a Room</h3>
+        <p>Select an available room for the upcoming semester. Only rooms matching your gender are shown.</p>
+    </div>
+
+    <div class="pay-note">
+        <i class="ti ti-info-circle" style="margin-right:4px"></i>
+        The full fee ($400) must be paid at the next step to secure your room. You can pay via <strong>EcoCash</strong> or <strong>Online Banking</strong>.
+    </div>
+
+    <div class="room-grid">
+        <div class="room-card card" th:each="room : ${rooms}">
+            <h3><span th:text="${room.blockName}">A</span>-<span th:text="${room.roomNumber}">101</span></h3>
+            <div style="font-size:10px;color:var(--g600);margin-bottom:4px">Block <span th:text="${room.blockName}">A</span> · Sharing (2/room)</div>
+            <div class="price-tag">$400 <span style="font-size:10px;color:var(--gray);font-weight:400">/sem</span></div>
+            <!-- Link to payment page instead of directly booking -->
+            <a th:href="@{/booking/payment(roomId=${room.id})}" class="btn btn-primary" style="display:block;text-align:center;margin-top:8px">
+                <i class="ti ti-credit-card" style="margin-right:4px"></i>Select &amp; Pay
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${rooms.empty}" class="card" style="text-align:center;padding:32px">
+        <i class="ti ti-mood-sad" style="font-size:32px;color:var(--gray);display:block;margin-bottom:8px"></i>
+        <p>No rooms available for your gender right now. Please check back later.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | BSAC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="login-container" style="align-items:flex-start;padding:32px 20px">
+    <div class="login-card" style="max-width:460px;margin:auto">
+        <div class="login-header">
+            <div class="logo-box"><i class="ti ti-building" aria-hidden="true"></i></div>
+            <h1>BSAC Portal</h1>
+            <p>Register a new student account</p>
+        </div>
+
+        <div th:if="${error}" class="error-message">
+            <i class="ti ti-alert-circle" style="margin-right:4px"></i>
+            <span th:text="${error}">Error</span>
+        </div>
+
+        <form th:action="@{/register}" method="post">
+
+            <!-- ── PERSONAL DETAILS ── -->
+            <div style="font-size:10px;font-weight:700;color:var(--blk3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;margin-top:4px">
+                Personal Details
+            </div>
+
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" class="form-control" required placeholder="e.g. Thandeka Moyo">
+            </div>
+
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender" class="form-control" required>
+                    <option value="">Select gender</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="studentNumber">NUST Student Number</label>
+                <input type="text" id="studentNumber" name="studentNumber" class="form-control" required
+                       placeholder="e.g. N01234567S" maxlength="10">
+                <small style="display:block;margin-top:4px;font-size:10px;color:var(--gray)">
+                    Format: N + 8 digits + 1 letter (e.g. N01234567S)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="nationalId">Zimbabwe National ID <span style="font-weight:400;color:var(--gray)">(used as password)</span></label>
+                <input type="text" id="nationalId" name="nationalId" class="form-control" required
+                       placeholder="e.g. 08-1234567-F-43">
+            </div>
+
+            <!-- ── ACADEMIC DETAILS ── -->
+            <div style="height:.5px;background:var(--border);margin:16px 0"></div>
+            <div style="font-size:10px;font-weight:700;color:var(--blk3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">
+                Academic Details
+            </div>
+
+            <div class="form-group">
+                <label for="program">Programme / Course</label>
+                <input type="text" id="program" name="program" class="form-control"
+                       placeholder="e.g. BSc Computer Science, BEng Civil Engineering">
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="form-group">
+                    <label for="yearOfStudy">Year of Study</label>
+                    <select id="yearOfStudy" name="yearOfStudy" class="form-control">
+                        <option value="">Select year</option>
+                        <option value="Year 1">Year 1</option>
+                        <option value="Year 2">Year 2</option>
+                        <option value="Year 3">Year 3</option>
+                        <option value="Year 4">Year 4</option>
+                        <option value="Year 5">Year 5</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="part">Part</label>
+                    <select id="part" name="part" class="form-control">
+                        <option value="">Select part</option>
+                        <option value="Part I">Part I</option>
+                        <option value="Part II">Part II</option>
+                        <option value="Part III">Part III</option>
+                        <option value="Part IV">Part IV</option>
+                        <option value="Part V">Part V</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="semesterEnrolled">Current Semester</label>
+                <select id="semesterEnrolled" name="semesterEnrolled" class="form-control">
+                    <option value="">Select semester</option>
+                    <option value="Semester 1">Semester 1</option>
+                    <option value="Semester 2">Semester 2</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top:8px">
+                <i class="ti ti-user-plus" style="margin-right:6px"></i>Create Account
+            </button>
+        </form>
+
+        <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--gray)">
+            Already have an account?
+            <a href="/login" style="color:var(--g700);font-weight:600;text-decoration:none;margin-left:4px">Sign in here</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

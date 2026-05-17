@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accommodation Rules | BSAC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="navbar-brand">
+        <i class="ti ti-building" aria-hidden="true"></i> BSAC Portal
+    </a>
+    <div class="nav-links" style="display:flex;align-items:center;gap:16px">
+        <a href="/dashboard"><i class="ti ti-home" style="margin-right:4px"></i>Home</a>
+        <a href="/booking"><i class="ti ti-bed" style="margin-right:4px"></i>Book Room</a>
+        <a href="/storage"><i class="ti ti-package" style="margin-right:4px"></i>Storage</a>
+        <a href="/complaints"><i class="ti ti-tool" style="margin-right:4px"></i>Complaints</a>
+        <a href="/rules" class="active"><i class="ti ti-gavel" style="margin-right:4px"></i>Rules</a>
+        <a href="/admin" style="color:var(--g700);font-weight:600"><i class="ti ti-shield-check" style="margin-right:4px"></i>Admin Portal</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn-logout"><i class="ti ti-logout" style="margin-right:4px"></i>Logout</button>
+        </form>
+        <!-- Clickable Student Profile Avatar -->
+        <div class="avatar-container" style="position:relative;cursor:pointer" onclick="changeStudentProfilePicture()" title="Click to change profile picture">
+            <img th:src="${student.profilePictureUrl}" alt="Student Profile" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--g600);transition:transform 0.2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            <div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--g600);border-radius:50%;border:2px solid #fff"></div>
+        </div>
+    </div>
+</nav>
+
+<div class="container" style="max-width:800px">
+    <div class="welcome-banner" style="background:var(--g800)">
+        <div>
+            <h3>BSAC Accommodation Rules & Regulations 📜</h3>
+            <p>Please strictly follow these terms to ensure a clean, secure, and quiet learning environment.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3><i class="ti ti-gavel" style="margin-right:6px;color:var(--g600)"></i>Official Rules</h3>
+        
+        <div th:if="${rules.empty}" style="padding:24px;text-align:center;color:var(--gray)">
+            <i class="ti ti-info-circle" style="font-size:32px;display:block;margin-bottom:8px;color:var(--g300)"></i>
+            No portal rules have been defined by the administration yet.
+        </div>
+
+        <ul style="padding-left:20px;line-height:2.0;font-size:13px;color:var(--blk3)" th:unless="${rules.empty}">
+            <li th:each="rule : ${rules}" style="margin-bottom:12px">
+                <span th:text="${rule.content}">Rule Content</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script th:inline="javascript">
+function changeStudentProfilePicture() {
+    /*<![CDATA[*/
+    const currentUrl = /*[[${student.profilePictureUrl}]]*/ '';
+    const url = prompt("Enter a profile picture URL to update your avatar:", currentUrl);
+    if (url && url.trim() !== "") {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/profile/picture";
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "profilePictureUrl";
+        input.value = url.trim();
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+    /*]]>*/
+}
+</script>
+</body>
+</html>

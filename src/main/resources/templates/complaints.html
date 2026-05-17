@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaints &amp; Repairs | BSAC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="navbar-brand">
+        <i class="ti ti-building" aria-hidden="true"></i> BSAC Portal
+    </a>
+    <div class="nav-links" style="display:flex;align-items:center;gap:16px">
+        <a href="/dashboard"><i class="ti ti-home" style="margin-right:4px"></i>Home</a>
+        <a href="/booking"><i class="ti ti-bed" style="margin-right:4px"></i>Book Room</a>
+        <a href="/storage"><i class="ti ti-package" style="margin-right:4px"></i>Storage</a>
+        <a href="/complaints" class="active"><i class="ti ti-tool" style="margin-right:4px"></i>Complaints</a>
+        <a href="/rules"><i class="ti ti-gavel" style="margin-right:4px"></i>Rules</a>
+        <a href="/admin" style="color:var(--g700);font-weight:600"><i class="ti ti-shield-check" style="margin-right:4px"></i>Admin Portal</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn-logout"><i class="ti ti-logout" style="margin-right:4px"></i>Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="two-col">
+        <!-- Submit Complaint Form -->
+        <div class="card">
+            <h3><i class="ti ti-tool" style="margin-right:6px;color:var(--g600)"></i>Report an Issue</h3>
+            <form th:action="@{/complaints/add}" method="post">
+                <div class="form-group">
+                    <label for="roomId">Room (Optional)</label>
+                    <select id="roomId" name="roomId" class="form-control">
+                        <option value="">General Issue</option>
+                        <option th:each="b : ${bookings}"
+                                th:value="${b.room.id}"
+                                th:text="'Block ' + ${b.room.blockName} + ' — ' + ${b.room.roomNumber}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="5"
+                              required placeholder="Describe the issue in detail — e.g. leaking tap, broken socket..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-send" style="margin-right:6px"></i>Submit Complaint
+                </button>
+            </form>
+        </div>
+
+        <!-- Complaints List -->
+        <div class="card">
+            <h3><i class="ti ti-list-check" style="margin-right:6px;color:var(--g600)"></i>Your Complaints</h3>
+
+            <div th:if="${complaints.empty}" style="padding:16px 0;text-align:center">
+                <i class="ti ti-mood-happy" style="font-size:28px;color:var(--g300);display:block;margin-bottom:8px"></i>
+                <p>No complaints filed yet. Great!</p>
+            </div>
+
+            <div th:each="c : ${complaints}" class="complaint-item">
+                <div class="ci-top">
+                    <span class="ci-title"
+                          th:text="${c.room != null ? 'Block ' + c.room.blockName + ' — ' + c.room.roomNumber : 'General Issue'}">
+                        Room
+                    </span>
+                    <span class="badge badge-amb" th:if="${c.status == 'PENDING'}">In progress</span>
+                    <span class="badge badge-grn" th:unless="${c.status == 'PENDING'}">Resolved</span>
+                </div>
+                <div class="ci-desc" th:text="${c.description}">Description</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

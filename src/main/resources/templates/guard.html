@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guard Gate Control | BSAC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body { background: #0c0f0d; color: #f4f6f3; }
+        .guard-card { background: #131814; border: 1px solid #222d24; color: #fff; max-width: 500px; margin: 40px auto; padding: 30px; border-radius: 12px; }
+        .form-control { background: #0c0f0d; border: 1px solid #222d24; color: #fff; text-align: center; font-size: 20px; font-family: monospace; letter-spacing: 2px; }
+        .form-control::placeholder { color: #555; }
+        .status-box { padding: 20px; border-radius: 8px; margin-top: 20px; text-align: center; }
+        .status-valid { background: #1b5e20; border: 1px solid #2e7d32; color: #fff; }
+        .status-invalid { background: #b71c1c; border: 1px solid #c62828; color: #fff; }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222d24; font-size: 13px; }
+        .detail-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar" style="background:#090d0b; border-bottom: 2px solid var(--g600); display:flex; justify-content:space-between; align-items:center">
+    <span class="navbar-brand" style="color:#fff">
+        <i class="ti ti-shield-check" aria-hidden="true" style="color:var(--g600)"></i> BSAC Security Gate
+    </span>
+    <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:#aaa">
+        <span><i class="ti ti-user-check" style="color:var(--g600);margin-right:4px"></i>Guard: <strong th:text="${guard.firstName} + ' ' + ${guard.surname}" style="color:#fff">John Moyo</strong></span>
+        <a href="/guard/logout" style="color:#ff5252;text-decoration:none;font-weight:600"><i class="ti ti-logout" style="margin-right:4px"></i>Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="guard-card">
+        <div style="text-align:center;margin-bottom:20px">
+            <i class="ti ti-lock-access" style="font-size:48px;color:var(--g600)"></i>
+            <h2 style="margin-top:10px;font-size:20px;font-weight:700">Gate Pass Verification</h2>
+            <p style="color:#888;font-size:12px;margin-top:4px">Enter the 6-digit visitor gate pass code to confirm host and visitor details.</p>
+        </div>
+
+        <form th:action="@{/guard/verify}" method="post" style="display:flex;flex-direction:column;gap:12px">
+            <div class="form-group">
+                <input type="text" name="gateCode" class="form-control" placeholder="e.g. 582910" required maxlength="6" autofocus th:value="${gateCode}">
+            </div>
+            <button type="submit" class="btn btn-primary" style="background:var(--g600);font-size:14px;padding:12px;margin-top:0">
+                <i class="ti ti-scan" style="margin-right:6px"></i>Verify Entry Code
+            </button>
+        </form>
+
+        <div th:if="${verificationSuccess != null}" style="margin-top:20px;background:#1b5e20;border:1px solid #2e7d32;color:#fff;padding:16px;border-radius:8px;text-align:center">
+            <i class="ti ti-circle-check" style="font-size:24px;display:block;margin-bottom:4px"></i>
+            <strong style="font-size:14px" th:text="${verificationSuccess}">Success Message</strong>
+        </div>
+
+        <!-- Status Result Alert -->
+        <div th:if="${status != null}">
+            <div th:if="${status == 'VALID' && pass.status != 'VERIFIED_LEFT'}" class="status-box status-valid">
+                <i class="ti ti-circle-check" style="font-size:32px;display:block;margin-bottom:8px"></i>
+                <strong style="font-size:16px">ACCESS GRANTED</strong>
+                <p style="font-size:11px;opacity:0.9;margin-top:4px">This gate pass is authentic and active.</p>
+            </div>
+
+            <div th:if="${status == 'VALID' && pass.status == 'VERIFIED_LEFT'}" class="status-box" style="background:#263238;border:1px solid #37474f;color:#fff">
+                <i class="ti ti-logout" style="font-size:32px;display:block;margin-bottom:8px;color:#90a4ae"></i>
+                <strong style="font-size:16px;color:#90a4ae">CHECKED OUT</strong>
+                <p style="font-size:11px;opacity:0.9;margin-top:4px">This visitor has already departed and checked out.</p>
+            </div>
+
+            <div th:if="${status == 'INVALID'}" class="status-box status-invalid">
+                <i class="ti ti-circle-x" style="font-size:32px;display:block;margin-bottom:8px"></i>
+                <strong style="font-size:16px">ACCESS DENIED</strong>
+                <p style="font-size:11px;opacity:0.9;margin-top:4px">The gate pass code entered is invalid or expired.</p>
+            </div>
+
+            <!-- Pass details if Valid -->
+            <div th:if="${status == 'VALID'}" style="margin-top:20px;background:#181f19;border:1px solid #222d24;border-radius:8px;padding:16px">
+                <h4 style="font-size:12px;color:var(--g300);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px"><i class="ti ti-file-text" style="margin-right:4px"></i>Pass Information</h4>
+                
+                <div class="detail-row">
+                    <span style="color:#aaa">Visitor Name</span>
+                    <strong th:text="${pass.visitorName}">Blessing</strong>
+                </div>
+                <div class="detail-row">
+                    <span style="color:#aaa">Visitor Phone</span>
+                    <strong th:text="${pass.visitorPhone}">+263 77 123 4567</strong>
+                </div>
+                <div class="detail-row">
+                    <span style="color:#aaa">Student Host</span>
+                    <strong th:text="${pass.student.name}">John Doe</strong>
+                </div>
+                <div class="detail-row">
+                    <span style="color:#aaa">Host Room Allocation</span>
+                    <strong style="color:var(--g300)">
+                        Block <span th:text="${hostBooking != null ? hostBooking.room.blockName : '—'}">1</span> · Room <span th:text="${hostBooking != null ? hostBooking.room.roomNumber : '—'}">101</span>
+                    </strong>
+                </div>
+                <div class="detail-row" style="align-items:center;padding:12px 0">
+                    <span style="color:#aaa">Pass Status</span>
+                    <strong style="color:#fff">
+                        <span th:if="${pass.status == 'ACTIVE'}" style="color:var(--g300)">ACTIVE</span>
+                        <span th:if="${pass.status == 'HOST_REPORTED_LEFT'}" style="color:#ffb300">PENDING GUARD VERIFY</span>
+                        <span th:if="${pass.status == 'VERIFIED_LEFT'}" style="color:#888">CHECKED OUT</span>
+                    </strong>
+                </div>
+
+                <div th:if="${pass.status == 'ACTIVE' || pass.status == 'HOST_REPORTED_LEFT'}" style="margin-top:16px">
+                    <div th:if="${pass.status == 'HOST_REPORTED_LEFT'}" style="background:#4a3300;color:#ffb300;padding:8px;border-radius:4px;font-size:11px;margin-bottom:10px;text-align:center;border:1px solid #7b4f00">
+                        <i class="ti ti-info-circle" style="margin-right:4px"></i>Student host reported this visitor left.
+                    </div>
+                    <form th:action="@{/guard/visitor/verify-left/{id}(id=${pass.id})}" method="post">
+                        <button type="submit" class="btn btn-primary" style="background:#b71c1c;border:none;width:100%;font-size:13px;padding:10px">
+                            <i class="ti ti-logout" style="margin-right:6px"></i>Verify Visitor Checkout
+                        </button>
+                    </form>
+                </div>
+                <div th:if="${pass.status == 'VERIFIED_LEFT'}" style="margin-top:16px;text-align:center;color:#4caf50;font-size:12px;font-weight:600">
+                    <i class="ti ti-circle-check" style="margin-right:4px"></i> Visitor has already checked out.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

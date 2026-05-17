@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Unit | BSAC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="navbar-brand">
+        <i class="ti ti-building" aria-hidden="true"></i> BSAC Portal
+    </a>
+    <div class="nav-links" style="display:flex;align-items:center;gap:16px">
+        <a href="/dashboard"><i class="ti ti-home" style="margin-right:4px"></i>Home</a>
+        <a href="/booking"><i class="ti ti-bed" style="margin-right:4px"></i>Book Room</a>
+        <a href="/storage" class="active"><i class="ti ti-package" style="margin-right:4px"></i>Storage</a>
+        <a href="/complaints"><i class="ti ti-tool" style="margin-right:4px"></i>Complaints</a>
+        <a href="/rules"><i class="ti ti-gavel" style="margin-right:4px"></i>Rules</a>
+        <a href="/admin" style="color:var(--g700);font-weight:600"><i class="ti ti-shield-check" style="margin-right:4px"></i>Admin Portal</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn-logout"><i class="ti ti-logout" style="margin-right:4px"></i>Logout</button>
+        </form>
+        <!-- Clickable Student Profile Avatar -->
+        <div class="avatar-container" style="position:relative;cursor:pointer" onclick="changeStudentProfilePicture()" title="Click to change profile picture">
+            <img th:src="${student.profilePictureUrl}" alt="Student Profile" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--g600);transition:transform 0.2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            <div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--g600);border-radius:50%;border:2px solid #fff"></div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="two-col">
+        <!-- Add Item Form -->
+        <div class="card">
+            <h3><i class="ti ti-package" style="margin-right:6px;color:var(--g600)"></i>Add Storage Item</h3>
+
+            <div class="storage-info-box">
+                <p>List all items you are leaving in BSAC storage during the semester break.</p>
+                <div class="fee">$20 <span style="font-size:13px;font-weight:400;color:var(--g600)">/semester</span></div>
+                <span class="badge badge-grn">Storage open — Semester 1, 2026</span>
+            </div>
+
+            <form th:action="@{/storage/add}" method="post">
+                <div class="form-group">
+                    <label for="itemName">Item Name</label>
+                    <input type="text" id="itemName" name="itemName" class="form-control" required
+                           placeholder="e.g. Fridge, Wardrobe, TV">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description <span style="font-weight:400;color:var(--gray)">(optional)</span></label>
+                    <textarea id="description" name="description" class="form-control" rows="3"
+                              placeholder="Condition, serial numbers, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="paymentMethod">Payment Method</label>
+                    <select id="paymentMethod" name="paymentMethod" class="form-control" required style="width:100%;height:38px;padding:6px 12px;background:#fff;border:1px solid var(--border);border-radius:6px;font-size:12px">
+                        <option value="ECOCASH">EcoCash Wallet</option>
+                        <option value="ONLINE_BANKING">Online Bank Transfer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="paymentReference">Payment Reference / Transaction ID</label>
+                    <input type="text" id="paymentReference" name="paymentReference" class="form-control" required
+                           placeholder="e.g. ECO-1829983 or BANK-TXN-998">
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:12px">
+                    <i class="ti ti-plus" style="margin-right:6px"></i>Add to List
+                </button>
+            </form>
+        </div>
+
+        <!-- Items List Grouped Under One Name -->
+        <div class="card">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px">
+                <img th:src="${student.profilePictureUrl}" alt="Student Profile" style="width:38px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--g600)">
+                <div>
+                    <h3 style="margin:0;font-size:14px" th:text="${student.name}">Student Name</h3>
+                    <span style="font-size:10px;color:var(--gray)" th:text="'Student ID: ' + ${student.studentNumber}">N01234567S</span>
+                </div>
+            </div>
+
+            <h4 style="font-size:12px;font-weight:600;color:var(--blk3);margin-bottom:10px"><i class="ti ti-package" style="margin-right:4px"></i>Storage Inventory</h4>
+
+            <div th:if="${items.empty}" style="padding:20px 0;text-align:center">
+                <i class="ti ti-box" style="font-size:28px;color:var(--g300);display:block;margin-bottom:8px"></i>
+                <p>No storage items registered under your name yet.</p>
+            </div>
+
+            <div th:unless="${items.empty}" style="background:var(--wht2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px">
+                <ul style="padding-left:18px;margin:0;font-size:12px;line-height:2.0;color:var(--blk2)">
+                    <li th:each="item : ${items}" style="margin-bottom:8px;border-bottom:1px dashed var(--border);padding-bottom:6px">
+                        <strong th:text="${item.itemName}">Fridge</strong>
+                        <span th:if="${item.description != null && item.description != ''}" th:text="' - ' + ${item.description}" style="color:var(--gray)">Description</span>
+                        <div style="font-size:10px;color:var(--gray);margin-top:2px">
+                            Payment: <strong th:text="${item.paymentMethod != null ? item.paymentMethod : 'ECOCASH'}">ECOCASH</strong> (<span th:text="${item.paymentReference != null ? item.paymentReference : 'LEGACY'}">REF-998811</span>) &middot; Status: <strong style="color:var(--g700)" th:text="${item.status != null ? item.status : 'PENDING APPROVED'}">Pending</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div th:unless="${items.empty}"
+                 style="background:var(--g800);color:#fff;border-radius:8px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+                <div>
+                    <div style="font-size:10px;opacity:.8" th:text="${items.size()} + ' items listed under ' + ${student.name}">0 items</div>
+                    <div style="font-size:22px;font-weight:700">$20.00</div>
+                </div>
+                <span class="badge badge-grn">Flat fee</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+function changeStudentProfilePicture() {
+    /*<![CDATA[*/
+    const currentUrl = /*[[${student.profilePictureUrl}]]*/ '';
+    const url = prompt("Enter a profile picture URL to update your avatar:", currentUrl);
+    if (url && url.trim() !== "") {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/profile/picture";
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "profilePictureUrl";
+        input.value = url.trim();
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+    /*]]>*/
+}
+</script>
+</body>
+</html>

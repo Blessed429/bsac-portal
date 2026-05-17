@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | BSAC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-nav{background:#090d0b;color:#fff}
+        .admin-nav .navbar-brand{color:#fff}
+        .admin-nav .nav-links a{color:#bbb}
+        .admin-nav .nav-links a:hover, .admin-nav .nav-links a.active{color:#fff}
+        .stat-icon{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px}
+        .complaint-admin-card{border-bottom:1px solid var(--border);padding:12px 0}
+        .complaint-admin-card:last-child{border-bottom:none}
+        .btn-sm{padding:6px 12px;font-size:10px;width:auto;display:inline-block}
+        .btn-success{background:var(--g700);color:#fff;border:none}
+        .btn-success:hover{background:var(--g800)}
+    </style>
+</head>
+<body>
+<nav class="navbar admin-nav" style="background:#090d0b; border-bottom: 2px solid var(--g600)">
+    <a href="/admin" class="navbar-brand" style="color:#fff">
+        <i class="ti ti-shield-check" aria-hidden="true" style="color:var(--g600)"></i> BSAC Admin Console
+    </a>
+    <div class="nav-links" style="display:flex;align-items:center;gap:16px">
+        <a href="/dashboard"><i class="ti ti-arrow-left" style="margin-right:4px"></i>Student Portal</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn-logout" style="color:#bbb"><i class="ti ti-logout" style="margin-right:4px"></i>Logout</button>
+        </form>
+        <!-- Clickable Admin Profile Avatar -->
+        <div class="admin-avatar-container" style="position:relative;cursor:pointer" onclick="changeAdminProfilePicture()" title="Click to change profile picture">
+            <img th:src="${admin.profilePictureUrl}" alt="Admin Profile" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--g600);transition:transform 0.2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            <div style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:var(--g600);border-radius:50%;border:2px solid #090d0b"></div>
+        </div>
+    </div>
+</nav>
+
+<div class="container" style="max-width:1200px">
+    <div class="welcome-banner" style="background:#090d0b;color:#fff;border-color:#090d0b">
+        <div>
+            <h3>Welcome to Admin Control Panel 🛠️</h3>
+            <p>Monitor real-time room bookings, student registration data, complaints and storage requests.</p>
+        </div>
+        <span class="badge badge-grn" style="font-size:11px">SYSTEM ONLINE</span>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid-cards" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:24px;gap:16px">
+        <!-- Card 1 -->
+        <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;border-left:4px solid #1b5e20">
+            <div>
+                <div class="stat-icon" style="background:#e8f5e9;color:#1b5e20"><i class="ti ti-bed"></i></div>
+                <div style="font-size:12px;color:var(--gray);font-weight:500">Total Bookings</div>
+                <h2 style="font-size:28px;font-weight:700;margin-top:4px" th:text="${totalBookingsCount}">0</h2>
+            </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;border-left:4px solid #0d47a1">
+            <div>
+                <div class="stat-icon" style="background:#e3f2fd;color:#0d47a1"><i class="ti ti-door-enter"></i></div>
+                <div style="font-size:12px;color:var(--gray);font-weight:500">Rooms Available</div>
+                <h2 style="font-size:28px;font-weight:700;margin-top:4px" th:text="${roomsAvailableCount}">0</h2>
+            </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;border-left:4px solid #c62828">
+            <div>
+                <div class="stat-icon" style="background:#ffebee;color:#c62828"><i class="ti ti-tool"></i></div>
+                <div style="font-size:12px;color:var(--gray);font-weight:500">Open Complaints</div>
+                <h2 style="font-size:28px;font-weight:700;margin-top:4px" th:text="${openComplaintsCount}">0</h2>
+            </div>
+        </div>
+        <!-- Card 4 -->
+        <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;border-left:4px solid #ef6c00">
+            <div>
+                <div class="stat-icon" style="background:#fff3e0;color:#ef6c00"><i class="ti ti-package"></i></div>
+                <div style="font-size:12px;color:var(--gray);font-weight:500">Storage Requests</div>
+                <h2 style="font-size:28px;font-weight:700;margin-top:4px" th:text="${storageRequestsCount}">0</h2>
+            </div>
+        </div>
+        <!-- Card 5 (Total Revenue) -->
+        <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;border-left:4px solid var(--g600);background:#f1f8e9">
+            <div>
+                <div class="stat-icon" style="background:#c8e6c9;color:#1b5e20"><i class="ti ti-coin"></i></div>
+                <div style="font-size:12px;color:#1b5e20;font-weight:700">Amount Received</div>
+                <h2 style="font-size:28px;font-weight:700;margin-top:4px;color:#1b5e20" th:text="'$' + ${#numbers.formatDecimal(totalAmountReceived, 1, 'COMMA', 2, 'POINT')}">$0.00</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="two-col" style="grid-template-columns:2fr 1fr;gap:20px;align-items:start">
+        
+        <!-- Bookings Management -->
+        <div class="card">
+            <h3><i class="ti ti-list" style="margin-right:6px;color:var(--g600)"></i>Student Bookings</h3>
+            
+            <div th:if="${bookings.empty}" style="padding:20px 0;text-align:center;color:var(--gray)">
+                No student bookings recorded yet.
+            </div>
+
+            <table class="table" th:unless="${bookings.empty}" style="font-size:12px">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Academic Profile</th>
+                        <th>Room</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b : ${bookings}">
+                        <td>
+                            <div style="font-weight:600" th:text="${b.student.name}">Name</div>
+                            <div style="font-size:10px;color:var(--gray)" th:text="${b.student.studentNumber}">N01234567S</div>
+                        </td>
+                        <td>
+                            <div th:if="${b.student.program != null}" style="font-size:11px" th:text="${b.student.program}">CS</div>
+                            <div style="font-size:10px;color:var(--gray)">
+                                <span th:text="${b.student.yearOfStudy}">Year 2</span> · <span th:text="${b.student.part}">Part II</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span style="font-weight:600">Block <span th:text="${b.room.blockName}">A</span></span><br>
+                            Room <span th:text="${b.room.roomNumber}">101</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-grn" th:if="${b.paymentMethod == 'ECOCASH'}" th:text="'EcoCash (' + ${b.paymentReference} + ')'">EcoCash</span>
+                            <span class="badge badge-blk" th:if="${b.paymentMethod == 'ONLINE_BANKING'}" th:text="'Bank (' + ${b.paymentReference} + ')'">Bank</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-amb" th:if="${b.status.contains('PENDING')}" th:text="${b.status}">PENDING</span>
+                            <span class="badge badge-grn" th:unless="${b.status.contains('PENDING')}" th:text="${b.status}">SECURED</span>
+                        </td>
+                        <td>
+                            <div style="display:flex;flex-direction:column;gap:6px">
+                                <!-- Approve Button for Pending bookings -->
+                                <form th:if="${b.status.contains('PENDING')}" th:action="@{/admin/booking/approve/{id}(id=${b.id})}" method="post" style="display:inline">
+                                    <button type="submit" class="btn btn-primary btn-sm btn-success" style="width:100%;margin-top:0">
+                                        <i class="ti ti-check" style="margin-right:2px"></i>Approve
+                                    </button>
+                                </form>
+                                <!-- Evict/Remove Button for any booking -->
+                                <form th:action="@{/admin/booking/remove/{id}(id=${b.id})}" method="post" style="display:inline" onsubmit="return confirm('Are you sure you want to remove this student from the room?')">
+                                    <button type="submit" class="btn btn-primary btn-sm" style="background:#c62828;color:#fff;width:100%;margin-top:0;border:none">
+                                        <i class="ti ti-trash" style="margin-right:2px"></i>Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Right Hand Column: Complaints & Storage -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+            
+            <!-- Complaint Queue -->
+            <div class="card">
+                <h3><i class="ti ti-tool" style="margin-right:6px;color:#c62828"></i>Complaint Queue</h3>
+                
+                <div th:if="${complaints.empty}" style="padding:16px 0;text-align:center;color:var(--gray)">
+                    No complaints registered. Good!
+                </div>
+
+                <div th:each="c : ${complaints}" class="complaint-admin-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                        <span style="font-size:11px;font-weight:700;color:var(--blk2)"
+                              th:text="${c.room != null ? 'Block ' + c.room.blockName + ' — ' + c.room.roomNumber : 'General Issue'}">Room</span>
+                        <span class="badge badge-amb" th:if="${c.status == 'PENDING'}">Open</span>
+                        <span class="badge badge-grn" th:unless="${c.status == 'PENDING'}">Resolved</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--gray);margin-bottom:6px" th:text="${c.student.name} + ' (' + ${c.student.studentNumber} + ')'">Student Info</div>
+                    <p style="font-size:12px;color:var(--blk3);margin-bottom:8px;line-height:1.4" th:text="${c.description}">Description</p>
+                    
+                    <form th:if="${c.status == 'PENDING'}" th:action="@{/admin/complaint/resolve/{id}(id=${c.id})}" method="post">
+                        <button type="submit" class="btn btn-primary btn-sm" style="background:#c62828;border:none">
+                            <i class="ti ti-check" style="margin-right:2px"></i>Resolve
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Stored Items Control Grouped By Student -->
+            <div class="card">
+                <h3><i class="ti ti-package" style="margin-right:6px;color:var(--g600)"></i>Grouped Storage Inventory</h3>
+                
+                <div th:if="${groupedStorage.empty}" style="padding:16px 0;text-align:center;color:var(--gray)">
+                    No storage items recorded in the portal yet.
+                </div>
+
+                <div th:each="entry : ${groupedStorage.entrySet()}" style="padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--wht2);margin-bottom:12px">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                        <img th:src="${entry.key.profilePictureUrl}" alt="Student Profile" style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid var(--g600)">
+                        <div>
+                            <span style="font-weight:700;font-size:12px;color:var(--blk2)" th:text="${entry.key.name}">Student Name</span>
+                            <span style="font-size:10px;color:var(--gray);margin-left:6px" th:text="${entry.key.studentNumber}">N01234567S</span>
+                        </div>
+                    </div>
+                    <ul style="padding-left:16px;margin:0;font-size:11px;color:var(--blk3);line-height:1.6">
+                        <li th:each="item : ${entry.value}" style="margin-bottom:8px;border-bottom:1px dashed var(--border);padding-bottom:6px">
+                            <strong th:text="${item.itemName}">Fridge</strong>
+                            <span th:if="${item.description != null && item.description != ''}" th:text="' - ' + ${item.description}" style="color:var(--gray)">Condition</span>
+                             <div style="font-size:10px;color:var(--gray);margin-top:2px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px">
+                                <div>
+                                    Paid: <span th:text="${item.paymentMethod != null ? item.paymentMethod : 'ECOCASH'}">ECOCASH</span> (<span th:text="${item.paymentReference != null ? item.paymentReference : 'LEGACY'}">REF</span>)
+                                    &middot; Status: <strong style="color:var(--g700)" th:text="${item.status != null ? item.status : 'PENDING APPROVAL'}">Pending</strong>
+                                </div>
+                                <div th:if="${item.status != null && item.status.contains('PENDING')}">
+                                    <form th:action="@{/admin/storage/approve/{id}(id=${item.id})}" method="post" style="display:inline">
+                                        <button type="submit" class="btn btn-primary" style="margin-top:0;font-size:9px;padding:2px 6px;background:var(--g600)">
+                                            Approve Payment
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Manage Accommodation Rules -->
+            <div class="card">
+                <h3><i class="ti ti-gavel" style="margin-right:6px;color:var(--g600)"></i>Manage Rules & Regulations</h3>
+                
+                <form th:action="@{/admin/rules/add}" method="post" style="margin-bottom:16px;display:flex;gap:8px">
+                    <input type="text" name="content" class="form-control" placeholder="Type new rule & hit enter..." required style="flex:1">
+                    <button type="submit" class="btn btn-primary" style="margin-top:0;width:auto;padding:8px 16px;background:var(--g700)">
+                        <i class="ti ti-plus"></i>
+                    </button>
+                </form>
+
+                <div th:if="${rules.empty}" style="padding:10px 0;text-align:center;color:var(--gray);font-size:11px">
+                    No active accommodation rules.
+                </div>
+
+                <div th:each="rule : ${rules}" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--border)">
+                    <span style="font-size:11px;color:var(--blk3);line-height:1.4;flex:1;padding-right:8px" th:text="${rule.content}">Rule content</span>
+                    <form th:action="@{/admin/rules/delete/{id}(id=${rule.id})}" method="post" style="display:inline" onsubmit="return confirm('Delete this rule?')">
+                        <button type="submit" class="btn-logout" style="color:#d32f2f;cursor:pointer;background:none;border:none"><i class="ti ti-trash"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Publish Announcements -->
+            <div class="card">
+                <h3><i class="ti ti-speakerphone" style="margin-right:6px;color:var(--g600)"></i>Publish Announcements</h3>
+
+                <form th:action="@{/admin/announcements/add}" method="post" style="margin-bottom:16px">
+                    <div class="form-group">
+                        <label for="annTitle">Title</label>
+                        <input type="text" id="annTitle" name="title" class="form-control" placeholder="e.g. Water Outage Alert" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="annContent">Announcement Details</label>
+                        <textarea id="annContent" name="content" class="form-control" rows="3" placeholder="Compose announcement details..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top:4px">
+                        <i class="ti ti-plus" style="margin-right:6px"></i>Publish Announcement
+                    </button>
+                </form>
+
+                <div th:if="${announcements.empty}" style="padding:10px 0;text-align:center;color:var(--gray);font-size:11px">
+                    No active announcements.
+                </div>
+
+                <div th:each="ann : ${announcements}" style="padding:10px 0;border-bottom:.5px solid var(--border)">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <strong style="font-size:12px;color:var(--blk2)" th:text="${ann.title}">Title</strong>
+                        <form th:action="@{/admin/announcements/delete/{id}(id=${ann.id})}" method="post" style="display:inline" onsubmit="return confirm('Delete this announcement?')">
+                            <button type="submit" class="btn-logout" style="color:#d32f2f;cursor:pointer;background:none;border:none"><i class="ti ti-trash"></i></button>
+                        </form>
+                    </div>
+                    <p style="font-size:11px;color:var(--gray);margin:4px 0 0" th:text="${ann.content}">Content</p>
+                </div>
+            </div>
+
+            <!-- Gate Visitor Log -->
+            <div class="card">
+                <h3><i class="ti ti-ticket" style="margin-right:6px;color:var(--g600)"></i>Visitor Gate Log</h3>
+
+                <div th:if="${visitorPasses.empty}" style="padding:16px 0;text-align:center;color:var(--gray)">
+                    No visitor entries booked today.
+                </div>
+
+                <div th:each="vp : ${visitorPasses}" style="padding:10px 0;border-bottom:.5px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <div style="font-weight:600;font-size:12px;color:var(--blk2)" th:text="${vp.visitorName}">Visitor Name</div>
+                        <div style="font-size:10px;color:var(--gray)" th:text="'Phone: ' + ${vp.visitorPhone}">Phone</div>
+                        <div style="font-size:10px;color:var(--g700)" th:text="'Student Host: ' + ${vp.student.name} + ' (' + ${vp.student.studentNumber} + ')'">Host</div>
+                    </div>
+                    <div style="background:var(--g100);border:1px dashed var(--g400);border-radius:6px;padding:6px 12px;text-align:center">
+                        <div style="font-size:8px;color:var(--g800);text-transform:uppercase">Gate Code</div>
+                        <span style="font-family:'Courier New', monospace;font-size:16px;font-weight:700;color:var(--g900)" th:text="${vp.gateCode}">123456</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Registered Student Accounts (Full Width) -->
+    <div class="card" style="margin-top:20px">
+        <h3><i class="ti ti-users" style="margin-right:6px;color:var(--g600)"></i>Registered Student Accounts</h3>
+        <p style="font-size:11px;color:var(--gray);margin-bottom:12px">Overview of all active student profiles registered on the Bulawayo Accommodation Portal.</p>
+
+        <table class="table" style="font-size:12px">
+            <thead>
+                <tr>
+                    <th>Student Details</th>
+                    <th>Gender</th>
+                    <th>Academic Profile</th>
+                    <th>Assigned Accommodation</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="st : ${students}">
+                    <td>
+                        <div style="font-weight:600;color:var(--blk2)" th:text="${st.name}">Jane Doe</div>
+                        <div style="font-size:10px;color:var(--gray)" th:text="${st.studentNumber}">N001</div>
+                    </td>
+                    <td>
+                        <span class="badge" th:classappend="${st.gender == 'Male' ? 'badge-blk' : 'badge-grn'}" th:text="${st.gender}">Female</span>
+                    </td>
+                    <td>
+                        <div th:text="${st.program}">BSc CS</div>
+                        <div style="font-size:10px;color:var(--gray)">
+                            <span th:text="${st.yearOfStudy}">Year 2</span> · <span th:text="${st.part}">Part II</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div th:with="b=${studentBookings.get(st.id)}">
+                            <div th:if="${b != null}">
+                                <span style="font-weight:700;color:var(--g800)">
+                                    Block <span th:text="${b.room.blockName}">1</span> · Room <span th:text="${b.room.roomNumber}">101</span>
+                                </span>
+                                <div style="font-size:9px;color:var(--gray)" th:text="${b.status}">SECURED</div>
+                            </div>
+                            <span th:if="${b == null}" style="color:var(--gray);font-style:italic">No room assigned</span>
+                        </div>
+                    </td>
+                    <td>
+                        <form th:action="@{/admin/student/delete/{id}(id=${st.id})}" method="post" onsubmit="return confirm('WARNING: Are you absolutely sure you want to permanently delete this student account? This will also remove all their bookings, visitors, complaints, and storage entries!')" style="display:inline">
+                            <button type="submit" class="btn btn-primary btn-sm" style="background:#c62828;color:#fff;border:none;margin-top:0">
+                                <i class="ti ti-trash" style="margin-right:2px"></i>Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Security Guard Accounts Management Section -->
+    <div class="card" style="margin-top:24px">
+        <h3 style="margin-bottom:16px"><i class="ti ti-shield-lock" style="margin-right:6px;color:var(--g600)"></i>Security Guard Accounts</h3>
+        
+        <!-- Generated Access Code Alert Notification -->
+        <div th:if="${guardSuccess != null}" class="success-message" style="margin-bottom:16px;background:var(--g800);color:#fff;padding:16px;border-radius:8px;font-weight:600">
+            <i class="ti ti-circle-check" style="margin-right:8px;font-size:20px;vertical-align:middle"></i>
+            <span th:text="${guardSuccess}">Success message here...</span>
+        </div>
+
+        <div class="two-col">
+            <!-- Add Guard Form -->
+            <div style="background:var(--wht2);border:1px solid var(--border);border-radius:8px;padding:16px">
+                <h4 style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--g700)"><i class="ti ti-user-plus" style="margin-right:4px"></i>Register New Guard</h4>
+                <form th:action="@{/admin/guard/add}" method="post" style="display:flex;flex-direction:column;gap:12px">
+                    <div class="form-group">
+                        <label for="guardFirstName" style="font-size:10px;text-transform:uppercase;color:var(--gray)">First Name</label>
+                        <input type="text" id="guardFirstName" name="firstName" class="form-control" placeholder="e.g. John" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="guardSurname" style="font-size:10px;text-transform:uppercase;color:var(--gray)">Surname</label>
+                        <input type="text" id="guardSurname" name="surname" class="form-control" placeholder="e.g. Moyo" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top:4px;background:var(--g700)">
+                        <i class="ti ti-plus" style="margin-right:4px"></i>Register & Generate Access Code
+                    </button>
+                </form>
+            </div>
+
+            <!-- Guard List -->
+            <div style="background:var(--wht2);border:1px solid var(--border);border-radius:8px;padding:16px">
+                <h4 style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--blk1)"><i class="ti ti-users" style="margin-right:4px"></i>Active Security Guards (<span th:text="${guardsCount}">0</span>)</h4>
+                
+                <div th:if="${guards.empty}" style="padding:20px 0;text-align:center;color:var(--gray)">
+                    <i class="ti ti-shield" style="font-size:24px;color:var(--g300);display:block;margin-bottom:6px"></i>
+                    No security guards registered yet.
+                </div>
+
+                <div th:unless="${guards.empty}" style="overflow-x:auto">
+                    <table class="table" style="font-size:11px;margin-top:0">
+                        <thead>
+                            <tr>
+                                <th>Guard Name</th>
+                                <th>Access Code</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="gd : ${guards}">
+                                <td>
+                                    <strong th:text="${gd.firstName} + ' ' + ${gd.surname}">John Moyo</strong>
+                                </td>
+                                <td>
+                                    <code style="background:var(--wht3);padding:2px 6px;border-radius:4px" th:text="${gd.loginCode}">SEC-8012</code>
+                                </td>
+                                <td>
+                                    <form th:action="@{/admin/guard/delete/{id}(id=${gd.id})}" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this guard account?')" style="display:inline">
+                                        <button type="submit" class="btn btn-primary btn-sm" style="background:#c62828;color:#fff;border:none;margin-top:0;font-size:9px;padding:2px 6px">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+function changeAdminProfilePicture() {
+    /*<![CDATA[*/
+    const currentUrl = /*[[${admin.profilePictureUrl}]]*/ '';
+    const url = prompt("Enter a profile picture URL to update your avatar:", currentUrl);
+    if (url && url.trim() !== "") {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/admin/profile/picture";
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "profilePictureUrl";
+        input.value = url.trim();
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+    /*]]>*/
+}
+</script>
+</body>
+</html>

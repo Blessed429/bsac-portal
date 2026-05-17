@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay &amp; Confirm | BSAC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .method-card{border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:14px;margin-bottom:10px;background:var(--wht)}
+        .method-card:hover{border-color:var(--g400);background:var(--g50)}
+        .method-card.selected{border-color:var(--g700);background:var(--g50)}
+        .method-card .method-icon{width:44px;height:44px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+        .method-card .method-name{font-size:14px;font-weight:600;color:var(--blk2)}
+        .method-card .method-sub{font-size:11px;color:var(--gray);margin-top:2px}
+        .method-radio{margin-left:auto;width:18px;height:18px;accent-color:var(--g700)}
+        .payment-detail{display:none;padding:14px;background:var(--wht3);border-radius:8px;border:1px solid var(--border);margin-bottom:12px}
+        .payment-detail.active{display:block}
+        .booking-summary{background:var(--g50);border:1px solid var(--g200);border-radius:8px;padding:14px;margin-bottom:16px}
+        .brow{display:flex;justify-content:space-between;font-size:12px;padding:4px 0}
+        .brow.total{border-top:1px solid var(--g200);margin-top:6px;padding-top:10px;font-weight:700;font-size:14px;color:var(--g800)}
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="navbar-brand">
+        <i class="ti ti-building" aria-hidden="true"></i> BSAC Portal
+    </a>
+    <div class="nav-links">
+        <a href="/dashboard"><i class="ti ti-home" style="margin-right:4px"></i>Home</a>
+        <a href="/booking" class="active"><i class="ti ti-bed" style="margin-right:4px"></i>Book Room</a>
+        <a href="/storage"><i class="ti ti-package" style="margin-right:4px"></i>Storage</a>
+        <a href="/complaints"><i class="ti ti-tool" style="margin-right:4px"></i>Complaints</a>
+        <a href="/admin" style="color:var(--g700);font-weight:600"><i class="ti ti-shield-check" style="margin-right:4px"></i>Admin Portal</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn-logout"><i class="ti ti-logout" style="margin-right:4px"></i>Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container" style="max-width:580px">
+
+    <!-- Back link -->
+    <a href="/booking" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--g700);text-decoration:none;margin-bottom:14px;font-weight:600">
+        <i class="ti ti-arrow-left"></i> Back to rooms
+    </a>
+
+    <div class="card" style="margin-bottom:16px">
+        <h3><i class="ti ti-credit-card" style="margin-right:6px;color:var(--g600)"></i>Pay &amp; Confirm Booking</h3>
+        <p>Pay the full fee of $400 to secure your room.</p>
+    </div>
+
+    <!-- Booking Summary -->
+    <div class="booking-summary">
+        <div style="font-size:12px;font-weight:700;color:var(--g800);margin-bottom:10px">
+            Booking Summary
+        </div>
+        <div class="brow">
+            <span style="color:var(--gray)">Room</span>
+            <span style="font-weight:600">
+                Block <span th:text="${room.blockName}">A</span> — Room <span th:text="${room.roomNumber}">101</span>
+            </span>
+        </div>
+        <div class="brow">
+            <span style="color:var(--gray)">Gender designated</span>
+            <span th:text="${room.designatedGender}">Female</span>
+        </div>
+        <div class="brow">
+            <span style="color:var(--gray)">Semester</span>
+            <span>2026 Semester 1</span>
+        </div>
+        <div class="brow">
+            <span style="color:var(--gray)">Full room fee</span>
+            <span>$400.00</span>
+        </div>
+        <div class="brow total">
+            <span>Total due now</span>
+            <span style="color:var(--g700)">$400.00</span>
+        </div>
+    </div>
+
+    <!-- Student info -->
+    <div style="display:flex;align-items:center;gap:10px;background:var(--wht);border:.5px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px">
+        <i class="ti ti-user-circle" style="font-size:26px;color:var(--g600)"></i>
+        <div>
+            <div style="font-weight:600;color:var(--blk2)" th:text="${student.name}">Name</div>
+            <div style="color:var(--gray)">
+                <span th:text="${student.studentNumber}">N01234567S</span>
+                <span th:if="${student.program != null}"> · <span th:text="${student.program}">Programme</span></span>
+                <span th:if="${student.part != null}"> · <span th:text="${student.part}">Part</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Method Selection -->
+    <form th:action="@{/booking/book}" method="post" id="paymentForm">
+        <input type="hidden" name="roomId" th:value="${room.id}">
+
+        <div style="font-size:11px;font-weight:700;color:var(--blk3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">
+            Select Payment Method
+        </div>
+
+        <!-- EcoCash -->
+        <label for="eco" style="display:block;cursor:pointer">
+            <div class="method-card selected" id="ecoCard">
+                <div class="method-icon" style="background:#e8f5e9;color:#1b5e20">
+                    <i class="ti ti-device-mobile"></i>
+                </div>
+                <div>
+                    <div class="method-name">EcoCash</div>
+                    <div class="method-sub">Pay via your EcoCash wallet — instant</div>
+                </div>
+                <input type="radio" id="eco" name="paymentMethod" value="ECOCASH" class="method-radio" checked
+                       onchange="switchMethod('eco')">
+            </div>
+        </label>
+
+        <!-- Online Banking -->
+        <label for="bank" style="display:block;cursor:pointer">
+            <div class="method-card" id="bankCard">
+                <div class="method-icon" style="background:#e3f2fd;color:#0d47a1">
+                    <i class="ti ti-building-bank"></i>
+                </div>
+                <div>
+                    <div class="method-name">Online Banking</div>
+                    <div class="method-sub">ZIPIT, CBZ, Stanbic, FBC, ZB Bank</div>
+                </div>
+                <input type="radio" id="bank" name="paymentMethod" value="ONLINE_BANKING" class="method-radio"
+                       onchange="switchMethod('bank')">
+            </div>
+        </label>
+
+        <!-- EcoCash Details -->
+        <div class="payment-detail active" id="ecoDetail">
+            <div style="font-size:11px;font-weight:600;color:var(--blk3);margin-bottom:8px">
+                <i class="ti ti-device-mobile" style="margin-right:4px;color:var(--g600)"></i>EcoCash Payment Details
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+                Send <strong>$400.00</strong> to EcoCash merchant number:<br>
+                <span style="font-size:18px;font-weight:700;color:var(--g700);letter-spacing:1px">*151*2*1*BSAC#</span><br>
+                <span style="font-size:10px;color:var(--gray)">Merchant: Bulawayo Student Accommodation Centre</span>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+                <label for="ecoRef">Your EcoCash Phone Number</label>
+                <input type="tel" id="ecoRef" name="paymentReference" class="form-control"
+                       placeholder="e.g. 0771234567" pattern="07[7|8][0-9]{7}">
+                <small style="font-size:10px;color:var(--gray);display:block;margin-top:4px">Enter the number used to make the payment</small>
+            </div>
+        </div>
+
+        <!-- Online Banking Details -->
+        <div class="payment-detail" id="bankDetail">
+            <div style="font-size:11px;font-weight:600;color:var(--blk3);margin-bottom:8px">
+                <i class="ti ti-building-bank" style="margin-right:4px;color:#0d47a1"></i>Online Banking Details
+            </div>
+            <div style="font-size:12px;color:var(--blk2);margin-bottom:10px;line-height:1.8">
+                Transfer <strong>$400.00</strong> to:<br>
+                <strong>Account Name:</strong> BSAC — Bulawayo Student Accommodation<br>
+                <strong>Account Number:</strong> 4145 0021 987612<br>
+                <strong>Bank:</strong> CBZ Bank / Stanbic / ZB Bank<br>
+                <strong>Reference:</strong> Your Student Number (e.g. N01234567S)
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+                <label for="bankRef">Bank Transaction Reference</label>
+                <input type="text" id="bankRef" name="paymentReference" class="form-control"
+                       placeholder="e.g. TXN2026051700123">
+                <small style="font-size:10px;color:var(--gray);display:block;margin-top:4px">Found on your bank transfer confirmation</small>
+            </div>
+        </div>
+
+        <div class="pay-note" style="margin-top:14px">
+            <i class="ti ti-shield-check" style="margin-right:4px"></i>
+            By confirming, you agree that the payment is non-refundable once the room is secured.
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="ti ti-circle-check" style="margin-right:6px"></i>Confirm &amp; Secure Room — $400
+        </button>
+        <a href="/booking" class="btn btn-outline" style="text-align:center;display:block">Cancel</a>
+    </form>
+</div>
+
+<script>
+function switchMethod(method) {
+    const ecoCard = document.getElementById('ecoCard');
+    const bankCard = document.getElementById('bankCard');
+    const ecoDetail = document.getElementById('ecoDetail');
+    const bankDetail = document.getElementById('bankDetail');
+    const ecoRef = document.getElementById('ecoRef');
+    const bankRef = document.getElementById('bankRef');
+
+    if (method === 'eco') {
+        ecoCard.classList.add('selected');
+        bankCard.classList.remove('selected');
+        ecoDetail.classList.add('active');
+        bankDetail.classList.remove('active');
+        ecoRef.name = 'paymentReference';
+        bankRef.name = 'paymentReference_unused';
+    } else {
+        bankCard.classList.add('selected');
+        ecoCard.classList.remove('selected');
+        bankDetail.classList.add('active');
+        ecoDetail.classList.remove('active');
+        bankRef.name = 'paymentReference';
+        ecoRef.name = 'paymentReference_unused';
+    }
+}
+</script>
+</body>
+</html>
